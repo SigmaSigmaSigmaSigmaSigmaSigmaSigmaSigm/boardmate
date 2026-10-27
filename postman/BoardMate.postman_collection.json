@@ -1,0 +1,1205 @@
+{
+  "info": {
+    "name": "BoardMate CRUD",
+    "description": "Запускайте всі запити послідовно. Колекція створює власні дані, перевіряє CRUD і помилки, потім видаляє створені дані. Зустрічі та авторизація ще не реалізовані.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api"
+    },
+    {
+      "key": "category_id",
+      "value": ""
+    },
+    {
+      "key": "game_id",
+      "value": ""
+    },
+    {
+      "key": "venue_id",
+      "value": ""
+    },
+    {
+      "key": "run_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Створити категорію",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/categories/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman {{run_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"run_id\", Date.now().toString());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"category_id\", pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "201 Created",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/categories/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman {{run_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"name\": \"Postman category\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Створити гру",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/games/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Лісові стежки\",\n  \"description\": \"Навчальний приклад гри.\",\n  \"category_id\": \"{{category_id}}\",\n  \"min_players\": 2,\n  \"max_players\": 4,\n  \"duration_minutes\": 45\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"game_id\", pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "201 Created",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/games/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Лісові стежки\",\n  \"description\": \"Навчальний приклад гри.\",\n  \"category_id\": \"{{category_id}}\",\n  \"min_players\": 2,\n  \"max_players\": 4,\n  \"duration_minutes\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"name\": \"Лісові стежки\",\n  \"description\": \"Навчальний приклад гри.\",\n  \"category_id\": 1,\n  \"min_players\": 2,\n  \"max_players\": 4,\n  \"duration_minutes\": 45\n}"
+        }
+      ]
+    },
+    {
+      "name": "Створити місце",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/venues/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Гральня\",\n  \"city\": \"Київ\",\n  \"address\": \"Вулиця, 10\",\n  \"description\": \"Клуб настільних ігор.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"venue_id\", pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "201 Created",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/venues/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Гральня\",\n  \"city\": \"Київ\",\n  \"address\": \"Вулиця, 10\",\n  \"description\": \"Клуб настільних ігор.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"name\": \"Гральня\",\n  \"city\": \"Київ\",\n  \"address\": \"Вулиця, 10\",\n  \"description\": \"Клуб настільних ігор.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Список: categories",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/categories/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/categories/"
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"count\": 1,\n  \"page\": 1,\n  \"results\": [\n    {\n      \"id\": 1,\n      \"name\": \"Postman category\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Деталі: categories",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/categories/{{category_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/categories/{{category_id}}/"
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"name\": \"Postman category\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Редагувати: categories",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/categories/{{category_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman updated {{run_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/categories/{{category_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman updated {{run_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"name\": \"Postman updated {{run_id}}\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Список: games",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/games/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/games/"
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"count\": 1,\n  \"page\": 1,\n  \"results\": [\n    {\n      \"id\": 1,\n      \"name\": \"Лісові стежки\",\n      \"description\": \"Навчальний приклад гри.\",\n      \"category_id\": 1,\n      \"min_players\": 2,\n      \"max_players\": 4,\n      \"duration_minutes\": 45\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Деталі: games",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/games/{{game_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/games/{{game_id}}/"
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"name\": \"Лісові стежки\",\n  \"description\": \"Навчальний приклад гри.\",\n  \"category_id\": 1,\n  \"min_players\": 2,\n  \"max_players\": 4,\n  \"duration_minutes\": 45\n}"
+        }
+      ]
+    },
+    {
+      "name": "Редагувати: games",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/games/{{game_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"duration_minutes\": 60\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/games/{{game_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"duration_minutes\": 60\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"name\": \"Лісові стежки\",\n  \"description\": \"Навчальний приклад гри.\",\n  \"category_id\": 1,\n  \"min_players\": 2,\n  \"max_players\": 4,\n  \"duration_minutes\": 60\n}"
+        }
+      ]
+    },
+    {
+      "name": "Список: venues",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/venues/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/venues/"
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"count\": 1,\n  \"page\": 1,\n  \"results\": [\n    {\n      \"id\": 1,\n      \"name\": \"Гральня\",\n      \"city\": \"Київ\",\n      \"address\": \"Вулиця, 10\",\n      \"description\": \"Клуб настільних ігор.\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Деталі: venues",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/venues/{{venue_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/venues/{{venue_id}}/"
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"name\": \"Гральня\",\n  \"city\": \"Київ\",\n  \"address\": \"Вулиця, 10\",\n  \"description\": \"Клуб настільних ігор.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Редагувати: venues",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/venues/{{venue_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"city\": \"Львів\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/venues/{{venue_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"city\": \"Львів\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"name\": \"Гральня\",\n  \"city\": \"Львів\",\n  \"address\": \"Вулиця, 10\",\n  \"description\": \"Клуб настільних ігор.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Пошук і фільтри ігор",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/games/?search=Лісові&category_id={{category_id}}&players=3&ordering=-duration_minutes&page=1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"JSON response\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/games/?search=Лісові&category_id={{category_id}}&players=3&ordering=-duration_minutes&page=1"
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"count\": 1,\n  \"page\": 1,\n  \"results\": [\n    {\n      \"id\": 1,\n      \"name\": \"Лісові стежки\",\n      \"description\": \"Навчальний приклад гри.\",\n      \"category_id\": 1,\n      \"min_players\": 2,\n      \"max_players\": 4,\n      \"duration_minutes\": 45\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "400: неправильні межі гравців",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/games/{{game_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"min_players\": 10\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "400 Bad Request",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/games/{{game_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"min_players\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"non_field_errors: Мінімальна кількість гравців не може перевищувати максимальну.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "400: порожня назва",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/categories/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \" \"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "400 Bad Request",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/categories/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \" \"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"name: Це поле не може бути порожнім.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "400: неправильна сторінка",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/games/?page=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "400 Bad Request",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/games/?page=0"
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"page: Значення має бути не менше ніж 1.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "400: порожнє редагування",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/venues/{{venue_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "400 Bad Request",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/venues/{{venue_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"non_field_errors: Передайте поля для створення або зміни.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "404: гра не існує",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/games/2147483647/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "404 Not Found",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/games/2147483647/"
+          },
+          "status": "Not Found",
+          "code": 404,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"Не знайдено.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "409: повторна назва категорії",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/categories/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman updated {{run_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "409 Conflict",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/categories/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman updated {{run_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Conflict",
+          "code": 409,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"Категорія з такою назвою вже існує. Оберіть іншу назву.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "409: категорія має гру",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{base_url}}/categories/{{category_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "409 Conflict",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/categories/{{category_id}}/"
+          },
+          "status": "Conflict",
+          "code": 409,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"Неможливо видалити категорію: до неї належать 1 ігор. Спочатку видаліть ці ігри або змініть їхню категорію.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Видалити гру",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{base_url}}/games/{{game_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Empty response\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "204 No Content",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/games/{{game_id}}/"
+          },
+          "status": "No Content",
+          "code": 204,
+          "header": [],
+          "body": ""
+        }
+      ]
+    },
+    {
+      "name": "Видалити категорію після гри",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{base_url}}/categories/{{category_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Empty response\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "204 No Content",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/categories/{{category_id}}/"
+          },
+          "status": "No Content",
+          "code": 204,
+          "header": [],
+          "body": ""
+        }
+      ]
+    },
+    {
+      "name": "Видалити місце",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{base_url}}/venues/{{venue_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Empty response\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "204 No Content",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/venues/{{venue_id}}/"
+          },
+          "status": "No Content",
+          "code": 204,
+          "header": [],
+          "body": ""
+        }
+      ]
+    }
+  ]
+}
