@@ -4,6 +4,8 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.permissions import PublicReadAdminWrite
+
 from .errors import Conflict
 from .models import Category, Game
 
@@ -18,6 +20,8 @@ class ListQuerySerializer(serializers.Serializer):
 
 
 class ResourceList(APIView):
+    permission_classes = [PublicReadAdminWrite]
+
     model = None
     serializer_class = None
 
@@ -68,6 +72,8 @@ class ResourceList(APIView):
 
 
 class ResourceDetail(APIView):
+    permission_classes = [PublicReadAdminWrite]
+
     model = None
     serializer_class = None
 

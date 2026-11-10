@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "BoardMate CRUD",
-    "description": "Запускайте всі запити послідовно. Колекція створює власні дані, перевіряє CRUD і помилки, потім видаляє створені дані. Зустрічі та авторизація ще не реалізовані.",
+    "description": "Реєстрація, JWT, refresh, власні дані та права доступу; потім повний CRUD адміністратора. Перед запуском створіть адміністратора і заповніть admin_username та admin_password. Новий тестовий користувач залишається в локальній базі.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -24,9 +24,957 @@
     {
       "key": "run_id",
       "value": ""
+    },
+    {
+      "key": "admin_username",
+      "value": ""
+    },
+    {
+      "key": "admin_password",
+      "value": ""
+    },
+    {
+      "key": "access",
+      "value": ""
+    },
+    {
+      "key": "refresh",
+      "value": ""
+    },
+    {
+      "key": "member_username",
+      "value": ""
     }
   ],
   "item": [
+    {
+      "name": "401: власні дані без входу",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/me/",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error message\", () => pm.expect(pm.response.json().detail).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "401",
+          "originalRequest": {
+            "method": "GET",
+            "url": "{{base_url}}/me/",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"Приклад помилки.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "401: запис у каталог без входу",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/categories/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Недоступна\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error message\", () => pm.expect(pm.response.json().detail).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "401",
+          "originalRequest": {
+            "method": "POST",
+            "url": "{{base_url}}/categories/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Недоступна\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"Приклад помилки.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "400: відсутні поля реєстрації",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/auth/register/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Error message\", () => pm.expect(pm.response.json().detail).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "400",
+          "originalRequest": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"Обов’язкові поля не заповнені.\",\n  \"errors\": {\n    \"username\": [\n      \"Це поле обов’язкове.\"\n    ],\n    \"email\": [\n      \"Це поле обов’язкове.\"\n    ],\n    \"password\": [\n      \"Це поле обов’язкове.\"\n    ],\n    \"password_confirmation\": [\n      \"Це поле обов’язкове.\"\n    ]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "400: пароль не збігається",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/auth/register/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{member_username}}\",\n  \"first_name\": \"Марта\",\n  \"last_name\": \"\",\n  \"email\": \"member@example.com\",\n  \"password\": \"Forest-Game-482!\",\n  \"password_confirmation\": \"different\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"member_username\", \"member_\" + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Error message\", () => pm.expect(pm.response.json().detail).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "400",
+          "originalRequest": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{member_username}}\",\n  \"first_name\": \"Марта\",\n  \"last_name\": \"\",\n  \"email\": \"member@example.com\",\n  \"password\": \"Forest-Game-482!\",\n  \"password_confirmation\": \"different\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"Паролі не збігаються.\",\n  \"errors\": {\n    \"password_confirmation\": [\n      \"Паролі не збігаються.\"\n    ]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Реєстрація",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/auth/register/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{member_username}}\",\n  \"first_name\": \"Марта\",\n  \"last_name\": \"\",\n  \"email\": \"member@example.com\",\n  \"password\": \"Forest-Game-482!\",\n  \"password_confirmation\": \"Forest-Game-482!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "201",
+          "originalRequest": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{member_username}}\",\n  \"first_name\": \"Марта\",\n  \"last_name\": \"\",\n  \"email\": \"member@example.com\",\n  \"password\": \"Forest-Game-482!\",\n  \"password_confirmation\": \"Forest-Game-482!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"username\": \"member_example\",\n  \"first_name\": \"Марта\",\n  \"last_name\": \"\",\n  \"email\": \"member@example.com\",\n  \"is_staff\": false\n}"
+        }
+      ]
+    },
+    {
+      "name": "400: нік уже зайнятий",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/auth/register/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{member_username}}\",\n  \"first_name\": \"Марта\",\n  \"last_name\": \"\",\n  \"email\": \"member@example.com\",\n  \"password\": \"Forest-Game-482!\",\n  \"password_confirmation\": \"Forest-Game-482!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Error message\", () => pm.expect(pm.response.json().detail).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "400",
+          "originalRequest": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{member_username}}\",\n  \"first_name\": \"Марта\",\n  \"last_name\": \"\",\n  \"email\": \"member@example.com\",\n  \"password\": \"Forest-Game-482!\",\n  \"password_confirmation\": \"Forest-Game-482!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"Нік зайнятий.\",\n  \"errors\": {\n    \"username\": [\n      \"Користувач з таким ім’ям вже існує.\"\n    ]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "401: неправильний пароль",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/auth/login/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{member_username}}\",\n  \"password\": \"wrong\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error message\", () => pm.expect(pm.response.json().detail).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "401",
+          "originalRequest": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{member_username}}\",\n  \"password\": \"wrong\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"Приклад помилки.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Вхід користувача",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/auth/login/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{member_username}}\",\n  \"password\": \"Forest-Game-482!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"access\", pm.response.json().access);",
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"refresh\", pm.response.json().refresh);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200",
+          "originalRequest": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{member_username}}\",\n  \"password\": \"Forest-Game-482!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"access\": \"<access JWT>\",\n  \"refresh\": \"<refresh JWT>\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Власні дані",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/me/",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200",
+          "originalRequest": {
+            "method": "GET",
+            "url": "{{base_url}}/me/",
+            "header": []
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"username\": \"member_example\",\n  \"first_name\": \"Марта\",\n  \"last_name\": \"\",\n  \"email\": \"member@example.com\",\n  \"is_staff\": false\n}"
+        }
+      ]
+    },
+    {
+      "name": "403: користувач не адміністратор",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/categories/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Недоступна\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"Error message\", () => pm.expect(pm.response.json().detail).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "403",
+          "originalRequest": {
+            "method": "POST",
+            "url": "{{base_url}}/categories/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Недоступна\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"Приклад помилки.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Оновити access",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/auth/refresh/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refresh\": \"{{refresh}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"access\", pm.response.json().access);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200",
+          "originalRequest": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/refresh/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"access\": \"<new access JWT>\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Власні дані після refresh",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/me/",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200",
+          "originalRequest": {
+            "method": "GET",
+            "url": "{{base_url}}/me/",
+            "header": []
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"username\": \"member_example\",\n  \"first_name\": \"Марта\",\n  \"last_name\": \"\",\n  \"email\": \"member@example.com\",\n  \"is_staff\": false\n}"
+        }
+      ]
+    },
+    {
+      "name": "401: недійсний refresh",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/auth/refresh/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refresh\": \"invalid\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error message\", () => pm.expect(pm.response.json().detail).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "401",
+          "originalRequest": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/refresh/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"invalid\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"detail\": \"Приклад помилки.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Вхід адміністратора для CRUD",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/auth/login/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"access\", pm.response.json().access);",
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"refresh\", pm.response.json().refresh);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200",
+          "originalRequest": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"access\": \"<admin access JWT>\",\n  \"refresh\": \"<admin refresh JWT>\"\n}"
+        }
+      ]
+    },
     {
       "name": "Створити категорію",
       "request": {
@@ -742,7 +1690,7 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
-              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(data).to.have.property(\"detail\"); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -809,7 +1757,7 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
-              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(data).to.have.property(\"detail\"); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -862,7 +1810,7 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
-              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(data).to.have.property(\"detail\"); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -915,7 +1863,7 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
-              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(data).to.have.property(\"detail\"); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -968,7 +1916,7 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
-              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(data).to.have.property(\"detail\"); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -1021,7 +1969,7 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
-              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(data).to.have.property(\"detail\"); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -1074,7 +2022,7 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
-              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(Object.keys(data)).to.eql([\"detail\"]); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
+              "pm.test(\"JSON error\", () => { const data = pm.response.json(); pm.expect(data).to.have.property(\"detail\"); pm.expect(data.detail).to.be.a(\"string\").and.not.empty; });"
             ]
           }
         }
@@ -1201,5 +2149,15 @@
         }
       ]
     }
-  ]
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access}}",
+        "type": "string"
+      }
+    ]
+  }
 }
