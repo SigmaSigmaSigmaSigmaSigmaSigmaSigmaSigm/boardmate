@@ -1,3 +1,6 @@
 from django.urls import include, path
 
-urlpatterns = [path("api/", include("catalog.urls"))]
+urlpatterns = [
+    path("api/", include("accounts.urls")),
+    path("api/", include("catalog.urls")),
+]

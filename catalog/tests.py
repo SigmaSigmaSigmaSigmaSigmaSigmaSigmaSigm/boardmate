@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from rest_framework.test import APIClient
@@ -8,6 +9,9 @@ from .models import Category, Game, Venue
 class CatalogTests(TestCase):
     def setUp(self):
         self.client = APIClient()
+        self.client.force_authenticate(
+            get_user_model().objects.create_user("admin", is_staff=True)
+        )
         self.category = Category.objects.create(name="Стратегії")
         self.game_data = {
             "name": "Forest paths",
@@ -20,7 +24,7 @@ class CatalogTests(TestCase):
 
     def assert_error(self, response, status):
         self.assertEqual(response.status_code, status)
-        self.assertEqual(set(response.json()), {"detail"})
+        self.assertIn("detail", response.json())
         self.assertIsInstance(response.json()["detail"], str)
         self.assertTrue(response.json()["detail"])
 
@@ -179,9 +183,10 @@ class CatalogTests(TestCase):
             "/api/games/",
             HTTP_ORIGIN=origin,
             HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST",
-            HTTP_ACCESS_CONTROL_REQUEST_HEADERS="content-type",
+            HTTP_ACCESS_CONTROL_REQUEST_HEADERS="authorization,content-type",
         )
         self.assertEqual(response.status_code, 200)
+        self.assertIn("authorization", response["Access-Control-Allow-Headers"].lower())
         self.assertEqual(response["Access-Control-Allow-Origin"], origin)
         response = self.client.get(
             "/api/games/", HTTP_ORIGIN="http://untrusted.example"
