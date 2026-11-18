@@ -8,10 +8,13 @@ dependencies = [
     "django-cors-headers>=4.9.0",
     "djangorestframework>=3.18.3",
     "djangorestframework-simplejwt>=5.5.1",
+    "drf-spectacular>=0.30.0",
+    "python-dotenv>=1.2.4",
 ]
 
 [dependency-groups]
 dev = [
+    "coverage>=7.17.3",
     "ruff>=0.17.3",
 ]
 
@@ -20,3 +23,7 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.coverage.run]
+source = ["DjangoProject", "accounts", "catalog", "manage"]
+omit = ["*/migrations/*", "*/tests.py", "*/test_*.py"]

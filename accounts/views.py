@@ -1,8 +1,11 @@
 from django.db import IntegrityError, transaction
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from catalog.schema import ErrorResponse
 
 from .serializers import RegisterSerializer, UserSerializer
 
@@ -11,6 +14,9 @@ class RegisterView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        request=RegisterSerializer, responses={201: UserSerializer, 400: ErrorResponse}
+    )
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -27,5 +33,6 @@ class RegisterView(APIView):
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses={200: UserSerializer, 401: ErrorResponse})
     def get(self, request):
         return Response(UserSerializer(request.user).data)

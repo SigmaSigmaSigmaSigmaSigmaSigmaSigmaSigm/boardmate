@@ -46,7 +46,9 @@ class CategorySerializer(StrictModelSerializer):
 
 class GameSerializer(StrictModelSerializer):
     category_id = serializers.PrimaryKeyRelatedField(
-        source="category", queryset=Category.objects.all()
+        source="category",
+        queryset=Category.objects.all(),
+        help_text="ID наявної категорії.",
     )
 
     class Meta:
@@ -60,6 +62,11 @@ class GameSerializer(StrictModelSerializer):
             "max_players",
             "duration_minutes",
         ]
+        extra_kwargs = {
+            "min_players": {"help_text": "Не більше за max_players."},
+            "max_players": {"help_text": "Не менше за min_players."},
+            "duration_minutes": {"help_text": "Тривалість гри у хвилинах."},
+        }
 
     def validate(self, attrs):
         minimum = attrs.get("min_players", getattr(self.instance, "min_players", None))
