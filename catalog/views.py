@@ -1,3 +1,5 @@
+import logging
+
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -7,33 +9,54 @@ from rest_framework.views import APIView
 from accounts.permissions import PublicReadAdminWrite
 
 from .errors import Conflict
-from .models import Category, Game
+from .models import Category
+from .schema import CatalogSchema
+
+logger = logging.getLogger("boardmate.api")
 
 
 class ListQuerySerializer(serializers.Serializer):
-    page = serializers.IntegerField(min_value=1, default=1)
-    search = serializers.CharField(required=False, allow_blank=True)
+    page = serializers.IntegerField(
+        min_value=1, default=1, help_text="20 записів на сторінку."
+    )
+
+
+class GameQuerySerializer(ListQuerySerializer):
+    search = serializers.CharField(
+        required=False, allow_blank=True, help_text="Частина назви гри."
+    )
     category_id = serializers.IntegerField(min_value=1, required=False)
-    players = serializers.IntegerField(min_value=1, required=False)
-    city = serializers.CharField(required=False)
-    ordering = serializers.CharField(required=False)
+    players = serializers.IntegerField(
+        min_value=1,
+        required=False,
+        help_text="Кількість гравців у межах min_players і max_players.",
+    )
+    ordering = serializers.ChoiceField(
+        choices=("name", "duration_minutes", "-duration_minutes"),
+        required=False,
+        help_text="Типово name. Мінус означає спадний порядок.",
+    )
+
+
+class VenueQuerySerializer(ListQuerySerializer):
+    search = serializers.CharField(
+        required=False, allow_blank=True, help_text="Частина назви місця."
+    )
+    city = serializers.CharField(required=False, help_text="Повна назва міста.")
 
 
 class ResourceList(APIView):
     permission_classes = [PublicReadAdminWrite]
+    schema = CatalogSchema()
 
     model = None
     serializer_class = None
+    query_serializer_class = ListQuerySerializer
 
     def get(self, request):
-        allowed = {"page"}
-        if self.model is Game:
-            allowed |= {"search", "category_id", "players", "ordering"}
-        elif self.model is not Category:
-            allowed |= {"search", "city"}
-        if set(request.query_params) - allowed:
+        query = self.query_serializer_class(data=request.query_params)
+        if set(request.query_params) - set(query.fields):
             raise serializers.ValidationError("Невідомі параметри запиту.")
-        query = ListQuerySerializer(data=request.query_params)
         query.is_valid(raise_exception=True)
         params = query.validated_data
         records = self.model.objects.all()
@@ -48,8 +71,6 @@ class ResourceList(APIView):
                 min_players__lte=params["players"], max_players__gte=params["players"]
             )
         ordering = params.get("ordering", "name")
-        if ordering not in {"name", "duration_minutes", "-duration_minutes"}:
-            raise serializers.ValidationError("Недозволене сортування.")
         records = records.order_by(ordering, "id")
         page = params["page"]
         count = records.count()
@@ -67,12 +88,14 @@ class ResourceList(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         with transaction.atomic():
-            serializer.save()
+            obj = serializer.save()
+        logger.info("Catalog created resource=%s id=%d", self.model.__name__, obj.pk)
         return Response(serializer.data, status=201)
 
 
 class ResourceDetail(APIView):
     permission_classes = [PublicReadAdminWrite]
+    schema = CatalogSchema()
 
     model = None
     serializer_class = None
@@ -87,6 +110,7 @@ class ResourceDetail(APIView):
         serializer.is_valid(raise_exception=True)
         with transaction.atomic():
             serializer.save()
+        logger.info("Catalog updated resource=%s id=%d", self.model.__name__, obj.pk)
         return Response(serializer.data)
 
     def delete(self, request, pk):
@@ -100,4 +124,5 @@ class ResourceDetail(APIView):
                 )
         with transaction.atomic():
             obj.delete()
+        logger.info("Catalog deleted resource=%s id=%d", self.model.__name__, pk)
         return Response(status=204)

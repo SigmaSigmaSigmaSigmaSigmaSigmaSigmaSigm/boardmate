@@ -1,0 +1,16 @@
+[
+  {"model": "auth.user", "pk": 101, "fields": {"username": "test-admin", "password": "!", "is_staff": true}},
+  {"model": "auth.user", "pk": 102, "fields": {"username": "test-player", "password": "!"}},
+  {"model": "catalog.category", "pk": 10, "fields": {"name": "Стратегії"}},
+  {"model": "catalog.category", "pk": 20, "fields": {"name": "Кооперативні"}},
+  {
+    "model": "catalog.game",
+    "pk": 101,
+    "fields": {"name": "Forest paths", "description": "Лісова стратегія", "category": 10, "min_players": 2, "max_players": 4, "duration_minutes": 45}
+  },
+  {
+    "model": "catalog.game",
+    "pk": 102,
+    "fields": {"name": "Forest rush", "description": "Коротка лісова гра", "category": 20, "min_players": 1, "max_players": 2, "duration_minutes": 20}
+  }
+]

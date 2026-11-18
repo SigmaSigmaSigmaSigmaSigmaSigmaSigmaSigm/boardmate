@@ -3,17 +3,26 @@ from django.urls import path, re_path
 
 from .models import Category, Game, Venue
 from .serializers import CategorySerializer, GameSerializer, VenueSerializer
-from .views import ResourceDetail, ResourceList
+from .views import (
+    GameQuerySerializer,
+    ListQuerySerializer,
+    ResourceDetail,
+    ResourceList,
+    VenueQuerySerializer,
+)
 
 urlpatterns = []
-for resource, model, serializer in [
-    ("categories", Category, CategorySerializer),
-    ("games", Game, GameSerializer),
-    ("venues", Venue, VenueSerializer),
+for resource, model, serializer, query in [
+    ("categories", Category, CategorySerializer, ListQuerySerializer),
+    ("games", Game, GameSerializer, GameQuerySerializer),
+    ("venues", Venue, VenueSerializer, VenueQuerySerializer),
 ]:
     options = {"model": model, "serializer_class": serializer}
     urlpatterns += [
-        path(f"{resource}/", ResourceList.as_view(**options)),
+        path(
+            f"{resource}/",
+            ResourceList.as_view(query_serializer_class=query, **options),
+        ),
         path(f"{resource}/<int:pk>/", ResourceDetail.as_view(**options)),
     ]
 
